@@ -1,29 +1,15 @@
 import { McpServer } from "@modelcontextprotocol/server";
-import { z } from "zod";
+import type { SheetService } from "../services/SheetService";
+import { registerGetSheetData } from "./registerGetSheetData";
 
-export function createServer() {
-  const server = new McpServer({
-    name: "google-sheets-mcp",
-    version: "0.1.0",
-  });
 
-  server.registerTool(
-    "hello",
-    {
-      description: "Returns a greeting message.",
-      inputSchema: {
-        name: z.string().optional(),
-      },
-    },
-    async ({ name }) => ({
-      content: [
-        {
-          type: "text",
-          text: `Hello, ${name ?? "World"}!`,
-        },
-      ],
-    }),
-  );
+export function createServer(sheetService: SheetService) {
+    const server = new McpServer({
+        name: "google-sheets-mcp",
+        version: "0.2.0",
+    });
 
-  return server;
+    registerGetSheetData(server, sheetService);
+
+    return server;
 }
