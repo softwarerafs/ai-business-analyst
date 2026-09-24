@@ -1,17 +1,31 @@
 import { SignJWT, importPKCS8 } from "jose";
 import type {
-  SheetData,
-  SheetService,
+    SheetData,
+    SheetService,
 } from "./SheetService";
 
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const SHEETS_SCOPE = "https://www.googleapis.com/auth/spreadsheets.readonly";
+
+async function fetchWithTimeout(
+    input: RequestInfo | URL,
+    init: RequestInit = {},
+    timeoutMs = 10_000,
+): Promise<Response> {
+    return fetch(input, {
+        ...init,
+        signal: AbortSignal.timeout(timeoutMs),
+    });
+}
+
 
 export class GoogleSheetsService implements SheetService {
     constructor(
         private readonly clientEmail: string,
         private readonly privateKey: string,
     ) { }
+
+
 
 
 
@@ -35,7 +49,7 @@ export class GoogleSheetsService implements SheetService {
             assertion,
         });
 
-        const response = await fetch(TOKEN_URL, {
+        const response = await fetchWithTimeout(TOKEN_URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -71,7 +85,7 @@ export class GoogleSheetsService implements SheetService {
             `https://sheets.googleapis.com/v4/spreadsheets/` +
             `${encodeURIComponent(spreadsheetId)}/values/` +
             `${encodeURIComponent(range)}`;
-        const response = await fetch(url, {
+        const response = await fetchWithTimeout(url, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },

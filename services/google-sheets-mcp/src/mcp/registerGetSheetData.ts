@@ -1,5 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/server";
 import type { SheetService } from "../services/SheetService";
+import { getSheetDataHandler } from "./getSheetDataHandler";
 
 import {
     getSheetDataInputSchema,
@@ -23,26 +24,11 @@ export function registerGetSheetData(
                 openWorldHint: true,
             },
         },
-        async ({ spreadsheetId, range }) => {
-            try {
-                const result = await sheetService.getData(spreadsheetId, range);
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: JSON.stringify(result),
-                        },
-                        ],
-                            structuredContent: result,
-                };
-            } catch (error) {
-                const message =
-                error instanceof Error ? error.message : "Unknown error";
-                    return {
-                        content: [{ type: "text", text: message }],
-                        isError: true,
-                    };
-            }
-        },
+        async ({ spreadsheetId, range }) => 
+            getSheetDataHandler(
+                sheetService,
+                spreadsheetId,
+                range,
+            ),
     );
 }
